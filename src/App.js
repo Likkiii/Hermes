@@ -1,9 +1,9 @@
 import logo from './logo.svg';
-import Login from './components/Login';
+import Signup from './components/Signup';
 import './App.css';
 
 const App = () => {
-  return <Login />;
+  return <Signup />;
 };
 
 export default App;

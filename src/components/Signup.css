@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Aboreto&display=swap');
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: red;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: red;
+}
+
+::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: red;
+}
+
+.neon {
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box {
+  box-shadow: 0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106),
+    0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106);
+  border-radius: 0.5rem;
+}
+
+.header {
+  font-family: 'Aboreto', cursive;
+  background: radial-gradient(
+    circle at -1% 57.5%,
+    rgb(19, 170, 82) 0%,
+    rgb(0, 102, 43) 90%
+  );
+}
+
+.btn {
+  background: radial-gradient(
+    circle at -1% 57.5%,
+    rgb(19, 170, 82) 0%,
+    rgb(0, 102, 43) 90%
+  );
+}
+
+.btn:hover {
+  background: radial-gradient(
+    circle at -1% 57.5%,
+    rgb(26, 113, 62) 0%,
+    rgb(10, 87, 42) 90%
+  );
+}
