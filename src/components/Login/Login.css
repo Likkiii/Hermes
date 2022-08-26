@@ -1,8 +1,0 @@
-.box {
-    box-shadow: 0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106),
-      0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106), 0 0 5px rgb(0, 255, 106);
-    border-radius: 0.5rem;
-    border-width: 2rem;
-    border:solid black;
-  }
-  
