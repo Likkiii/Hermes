@@ -1,12 +1,12 @@
 import React from 'react';
-import './Signup.css';
-import neon from '../assets/neon.jpg';
+import styles from './Signup.css';
+import neon from '../../assets/neon.jpg';
 
-const Login = () => {
+const Signup = () => {
   return (
     <div class='flex items-center justify-center min-h-screen'>
       <img className='neon relative' src={neon} alt='neon' />
-      <div className='box absolute flex flex-col'>
+      <div className='{styles.box} absolute flex flex-col'>
         <div className='header flex justify-center font-bold text-5xl text-slate-900 rounded-t-lg px-8 py-1'>
           HERMES
         </div>
@@ -72,7 +72,7 @@ const Login = () => {
               </div>
               <div class='mt-6 text-gray-300'>
                 Already have an account?
-                <a class='text-green-500 hover:underline pl-2' href='#'>
+                <a class='text-green-500 hover:underline pl-2' href=''>
                   Log in
                 </a>
               </div>
@@ -84,4 +84,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
