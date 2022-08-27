@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Signup.css';
 import neon from '../../assets/neon.jpg';
 
@@ -74,9 +75,12 @@ const Login = () => {
               </div>
               <div className='mt-6 text-gray-300'>
                 Already have an account?
-                <a className='text-green-500 hover:underline pl-2' href='#nil'>
+                <Link
+                  to='/login'
+                  className='text-green-500 hover:underline pl-2'
+                >
                   Log in
-                </a>
+                </Link>
               </div>
             </div>
           </form>
