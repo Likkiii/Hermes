@@ -73,6 +73,8 @@ const Dashboard = () => {
           <div className='min-h-screen'>
             <div className='groups max-h-screen overflow-y-scroll'>
               <Groups />
+              <Groups />
+              <Groups />
             </div>
           </div>
         </div>

@@ -1,17 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Signup.css';
 import neon from '../../assets/neon.jpg';
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
-  const regUser = (e) => {
-    e.preventDefault();
-    console.log(e.target.username.value);
-    console.log(e.target.email.value);
-    console.log(e.target.password.value);
+  const [passwordType, setPasswordType] = useState('password');
+  const [passwordType2, setPasswordType2] = useState('password');
+
+  const togglePassword = () => {
+    if (passwordType === 'password') {
+      setPasswordType('text');
+    } else {
+      setPasswordType('password');
+    }
   };
+
+  const togglePassword2 = () => {
+    if (passwordType2 === 'password') {
+      setPasswordType2('text');
+    } else {
+      setPasswordType2('password');
+    }
+  };
+
+  const [user, setUser] = useState({
+    username: '',
+    password: '',
+    email: '',
+  });
+
+  const navigate = useNavigate();
+
+  const regUser = (e) => {
+    setUser({
+      username: e.target.username.value,
+      password: e.target.password.value,
+      email: e.target.email.value,
+    });
+  };
+
+  useEffect(() => {
+    axios
+      .post('http://localhost:3001/auth/register', user)
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err));
+  }, [user]);
 
   return (
     <div className='flex items-center justify-center min-h-screen'>
@@ -25,11 +60,7 @@ const Signup = () => {
             <div className='mt-4'>
               <div>
                 <i className='text-green-600 fas fa-user'></i>
-                <label
-                  class='block'
-                  className=' text-green-500 pl-2'
-                  for='Username'
-                >
+                <label className=' text-green-500 pl-2' for='Username'>
                   Username
                 </label>
                 <input
@@ -41,11 +72,7 @@ const Signup = () => {
               </div>
               <div className='mt-4'>
                 <i className='text-green-600 fas fa-envelope'></i>
-                <label
-                  class='block'
-                  className=' text-green-500 pl-2'
-                  for='email'
-                >
+                <label className=' text-green-500 pl-2' for='email'>
                   Email
                 </label>
                 <input
@@ -57,29 +84,44 @@ const Signup = () => {
               </div>
               <div className='mt-4'>
                 <i className='text-green-600 fa-solid fa-key hover'></i>
-                <label class='block' className=' text-green-500 pl-2'>
-                  Password
-                </label>
+                <label className=' text-green-500 pl-2'>Password</label>
                 <input
-                  type='password'
+                  type={passwordType}
                   placeholder='Enter your password...'
                   name='password'
                   className='w-full px-4 py-2 mt-2 text-white border-b-2 focus:outline-none border-green-600 bg-slate-900'
                 />
+                {passwordType === 'password' ? (
+                  <i
+                    className='fas fa-eye-slash text-green-600 absolute right-10 mt-4 cursor-pointer'
+                    onClick={togglePassword}
+                  ></i>
+                ) : (
+                  <i
+                    className='fas fa-eye text-green-600 absolute right-10 mt-4 cursor-pointer'
+                    onClick={togglePassword}
+                  ></i>
+                )}
               </div>
               <div className='mt-4'>
-                <label class='block' className=' text-green-500'>
-                  Confirm Password
-                </label>
+                <label className=' text-green-500'>Confirm Password</label>
                 <input
-                  type='password'
+                  type={passwordType2}
                   placeholder='Enter your password again...'
                   className='w-full px-4 py-2 mt-2 text-white border-b-2 focus:outline-none border-green-600 bg-slate-900'
                 />
+                {passwordType2 === 'password' ? (
+                  <i
+                    className='fas fa-eye-slash text-green-600 absolute right-10 mt-4 cursor-pointer'
+                    onClick={togglePassword2}
+                  ></i>
+                ) : (
+                  <i
+                    className='fas fa-eye text-green-600 absolute right-10 mt-4 cursor-pointer'
+                    onClick={togglePassword2}
+                  ></i>
+                )}
               </div>
-              <span className='text-xs text-red-400'>
-                Password must be same!
-              </span>
               <div className='flex'>
                 <button className='btn w-full px-6 py-2 mt-4 text-gray-300 font-semibold text-md rounded-lg'>
                   Create Account
