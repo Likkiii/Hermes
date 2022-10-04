@@ -2,8 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Signup.css';
 import neon from '../../assets/neon.jpg';
+import axios from 'axios';
+import { useEffect } from 'react';
 
-const Login = () => {
+const Signup = () => {
+  const regUser = (e) => {
+    e.preventDefault();
+    console.log(e.target.username.value);
+    console.log(e.target.email.value);
+    console.log(e.target.password.value);
+  };
+
   return (
     <div className='flex items-center justify-center min-h-screen'>
       <img className='neon relative' src={neon} alt='neon' />
@@ -12,7 +21,7 @@ const Login = () => {
           HERMES
         </div>
         <div className='flex px-8 py-6 text-left bg-slate-900 shadow-lg rounded-b-lg'>
-          <form action=''>
+          <form onSubmit={regUser}>
             <div className='mt-4'>
               <div>
                 <i className='text-green-600 fas fa-user'></i>
@@ -26,6 +35,7 @@ const Login = () => {
                 <input
                   type='text'
                   placeholder='Enter your username...'
+                  name='username'
                   className='w-full px-4 py-2 mt-2 text-white border-b-2 focus:outline-none border-green-600 bg-slate-900'
                 />
               </div>
@@ -41,6 +51,7 @@ const Login = () => {
                 <input
                   type='text'
                   placeholder='Enter your email...'
+                  name='email'
                   className='w-full px-4 py-2 mt-2 text-white border-b-2 focus:outline-none border-green-600 bg-slate-900'
                 />
               </div>
@@ -52,6 +63,7 @@ const Login = () => {
                 <input
                   type='password'
                   placeholder='Enter your password...'
+                  name='password'
                   className='w-full px-4 py-2 mt-2 text-white border-b-2 focus:outline-none border-green-600 bg-slate-900'
                 />
               </div>
@@ -90,4 +102,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
