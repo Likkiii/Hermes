@@ -40,3 +40,7 @@ ul li a {
   @apply bg-slate-800;
   border-radius: 10rem;
 }
+
+.items {
+  font-family: 'DM Sans' !important;
+}

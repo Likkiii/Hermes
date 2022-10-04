@@ -34,6 +34,7 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const regUser = (e) => {
+    e.preventDefault();
     setUser({
       username: e.target.username.value,
       password: e.target.password.value,
@@ -41,10 +42,21 @@ const Signup = () => {
     });
   };
 
+  if (localStorage.getItem('token')) {
+    window.location = '/dashboard';
+  }
+
   useEffect(() => {
     axios
       .post('http://localhost:3001/auth/register', user)
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data);
+        if ('error' in res.data) {
+          console.log(res.data.error);
+        } else {
+          navigate('/login');
+        }
+      })
       .catch((err) => console.log(err));
   }, [user]);
 

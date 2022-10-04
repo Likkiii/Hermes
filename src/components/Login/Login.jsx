@@ -3,9 +3,11 @@ import '../Signup/Signup.css';
 import neon from '../../assets/neon.jpg';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [passwordType, setPasswordType] = useState('password');
+  const navigate = useNavigate();
 
   const togglePassword = () => {
     if (passwordType === 'password') {
@@ -21,16 +23,27 @@ const Login = () => {
   });
 
   const loginUser = (e) => {
+    e.preventDefault();
     setUser({
       username: e.target.username.value,
       password: e.target.password.value,
     });
   };
 
+  if (localStorage.getItem('token')) {
+    window.location = '/dashboard';
+  }
+
   useEffect(() => {
     axios
       .post('http://localhost:3001/auth/login', user)
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data);
+        if ('token' in res.data) {
+          localStorage.setItem('token', res.data.token);
+          navigate('/dashboard');
+        }
+      })
       .catch((err) => console.log(err));
   }, [user]);
 

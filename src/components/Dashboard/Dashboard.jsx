@@ -1,21 +1,68 @@
 import React, { useState } from 'react';
 import './Dashboard.css';
 import Groups from '../Groups/Groups';
-import logout from '../../assets/logout.svg';
+import Logout from '../../assets/logout.svg';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useEffect } from 'react';
+import { data } from 'autoprefixer';
 
 const Dashboard = () => {
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const [user, setUser] = useState({
+    username: '',
+    email: '',
+  });
+  const [dropdownVisiblity, setDropdownVisibility] = useState('hidden');
+  const navigate = useNavigate();
+
+  const toggleDropdown = () => {
+    if (dropdownVisiblity === 'hidden') {
+      setDropdownVisibility('visible');
+    } else {
+      setDropdownVisibility('hidden');
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  if (localStorage.getItem('token') === null) {
+    window.location = '/login';
+  }
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/auth/user', {
+        params: {
+          token: localStorage.getItem('token'),
+        },
+      })
+      .then((res) => {
+        setUser({
+          username: res.data.user,
+          email: res.data.email,
+        });
+        console.log(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <div>
       <nav className='relative header flex flex-wrap items-center justify-between px-2 lg:px-10 xl:px-12 2xl:px-20 py-3 mb-3'>
         <div className='container px-4 mx-auto flex flex-wrap'>
           <div className='w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start'>
-            <a
-              className='font-black text-4xl inline-block mr-4 whitespace-nowrap uppercase text-slate-900 mt-0.5'
-              href='/dashboard'
-            >
-              Hermes
-            </a>
+            <div className='flex flex-row gap-5'>
+              <a
+                className='font-black text-4xl inline-block whitespace-nowrap uppercase text-slate-900 mt-0.5'
+                href='/dashboard'
+              >
+                Hermes
+              </a>
+            </div>
             <button
               className='text-slate-900 cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none'
               type='button'
@@ -31,7 +78,7 @@ const Dashboard = () => {
             }
             id='example-navbar-danger'
           >
-            <ul className='flex flex-col lg:flex-row list-none lg:ml-auto mt-0.5'>
+            <ul className='items flex flex-col lg:flex-row list-none lg:ml-auto mt-0.5'>
               <li className='nav-item'>
                 <a
                   className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'
@@ -48,17 +95,53 @@ const Dashboard = () => {
                   <span className='text-lg font-extrabold ml-2'>Pin</span>
                 </a>
               </li>
-              <li className='nav-item'></li>
-              <a
-                className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'
-                href='/'
-              >
+              <li className='nav-item'>
+                <button
+                  type='button'
+                  className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'
+                >
+                  <span onClick={toggleDropdown} className='text-xl ml-2'>
+                    Profile
+                  </span>
+                </button>
+                <ul
+                  class={`${dropdownVisiblity} min-w-max justify-center items-center absolute text-base z-50 float-left py-2 list-none rounded-lg shadow-lg mt-1 m-0 bg-clip-padding border-none bg-gray-800`}
+                >
+                  <li>
+                    <a
+                      class='dropdown-item text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white focus:text-white focus:bg-gray-700 active:bg-blue-600'
+                      href='#nil'
+                    >
+                      {user.username}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      class='dropdown-item text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white focus:text-white focus:bg-gray-700'
+                      href='#nil'
+                    >
+                      {user.email}
+                    </a>
+                  </li>
+                  <li></li>
+                  <li>
+                    <a
+                      class='dropdown-item text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white focus:text-white focus:bg-gray-700'
+                      href='#nil'
+                    >
+                      Status
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <div className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'>
                 <img
-                  src={logout}
+                  src={Logout}
                   alt='logout'
-                  className='absolute right-6 w-6 h-6 hover:opacity-75'
+                  onClick={logout}
+                  className='absolute right-6 w-6 h-6 hover:opacity-75 cursor-pointer'
                 />
-              </a>
+              </div>
             </ul>
           </div>
         </div>
