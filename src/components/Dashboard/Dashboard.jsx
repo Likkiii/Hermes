@@ -29,9 +29,9 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  if (localStorage.getItem('token') === null) {
-    window.location = '/login';
-  }
+  // if (localStorage.getItem('token') === null) {
+  //   window.location = '/login';
+  // }
 
   useEffect(() => {
     axios
