@@ -2,18 +2,35 @@ import React, { useState } from 'react';
 import './Dashboard.css';
 import Groups from '../Groups/Groups';
 import Logout from '../../assets/logout.svg';
+import Message1 from '../Message/Message1';
+import Message2 from '../Message/Message2';
+
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect } from 'react';
-import { data } from 'autoprefixer';
+import { SocketContext } from '../../context/socket';
 
 const Dashboard = () => {
+  const [messages, setMessages] = useState([]);
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [user, setUser] = useState({
     username: '',
     email: '',
   });
   const [dropdownVisiblity, setDropdownVisibility] = useState('hidden');
+  const socket = React.useContext(SocketContext);
+
+  useEffect(() => {
+    socket.on('msg', (msg) => {
+      msg.self = false;
+      setMessages((messages) => [...messages, msg]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   const navigate = useNavigate();
 
   const toggleDropdown = () => {
@@ -22,6 +39,31 @@ const Dashboard = () => {
     } else {
       setDropdownVisibility('hidden');
     }
+  };
+
+  const joinGroup = () => {
+    const group = window.prompt('Enter the group code: ');
+    console.log(group);
+  };
+
+  const sendMessage = () => {
+    const message = document.getElementById('msg').value;
+    console.log(message);
+
+    const time = new Date().toLocaleTimeString([], {
+      timeStyle: 'short',
+    });
+
+    const name = user.username;
+    const msg = {
+      name,
+      message,
+      time,
+      self: true,
+    };
+
+    socket.emit('msg', msg);
+    setMessages([...messages, msg]);
   };
 
   const logout = () => {
@@ -80,12 +122,12 @@ const Dashboard = () => {
           >
             <ul className='items flex flex-col lg:flex-row list-none lg:ml-auto mt-0.5'>
               <li className='nav-item'>
-                <a
-                  className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'
-                  href='#nil'
+                <div
+                  className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75 cursor-pointer'
+                  onClick={joinGroup}
                 >
-                  <span className='text-lg font-extrabold ml-2'>Invite</span>
-                </a>
+                  <span className='text-lg font-extrabold ml-2'>Join</span>
+                </div>
               </li>
               <li className='nav-item'>
                 <a
@@ -176,7 +218,7 @@ const Dashboard = () => {
                 <div className='ml-4'>
                   <p className='text-green-500 '>Group 1</p>
                   <p className='text-green-500 text-xs mt-1'>
-                    Thomas, Shreyas, Shravan, Additya
+                    {/* Thomas, Shreyas, Shravan, Additya */}
                   </p>
                 </div>
               </div>
@@ -236,7 +278,6 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-
                 <div className='flex justify-center mb-4'>
                   <div className='rounded bg-slate-700 py-2 px-4'>
                     <p className='text-xs text-slate-400'>
@@ -245,94 +286,46 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-
-                <div className='flex mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-red-600'>Thomas Biju</p>
-                    <p className='text-sm text-slate-300 mt-1'>
-                      Hi everyone! Glad you could join! I am making a new movie.
-                    </p>
-                    <p className='text-right text-xs text-slate-300 mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
-
-                <div className='flex mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-purple-500'>Shreyas Bhardwaj</p>
-                    <p className='text-sm text-slate-300 mt-1'>
-                      Hi all! I have one question for the movie
-                    </p>
-                    <p className='text-right text-xs text-slate-300 mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
-
-                <div className='flex mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-orange-600'>Additya Singhal</p>
-                    <p className='text-sm text-slate-300 mt-1'>
-                      Are you all coming for this one?
-                    </p>
-                    <p className='text-right text-slate-300 text-xs mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
-
-                <div className='flex justify-end mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-slate-300 mt-1'>Hi guys.</p>
-                    <p className='text-right text-slate-300 text-xs mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
-
-                <div className='flex justify-end mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-slate-300 mt-1'>Count me in!</p>
-                    <p className='text-right text-slate-300 text-xs mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
-
-                <div className='flex mb-2'>
-                  <div className='rounded bg-slate-600 py-2 px-3'>
-                    <p className='text-sm text-blue-600'>Shravan Prakash</p>
-                    <p className='text-sm text-slate-300 mt-1'>
-                      Get Likhit on this movie ASAP!
-                    </p>
-                    <p className='text-right text-slate-300 text-xs mt-1'>
-                      12:45 pm
-                    </p>
-                  </div>
-                </div>
+                {messages.map((msg) =>
+                  msg.self ? (
+                    <Message2
+                      name={msg.name}
+                      msg={msg.message}
+                      time={msg.time}
+                    />
+                  ) : (
+                    <Message1
+                      name={msg.name}
+                      msg={msg.message}
+                      time={msg.time}
+                    />
+                  )
+                )}
               </div>
             </div>
           </div>
 
           <div className='flex flex-row w-full'>
             <input
+              id='msg'
               type='text'
               placeholder='Type a message...'
               className='bg-slate-700 text-white w-4/5 mt-4 ml-20 h-10 rounded-lg p-2'
             />
             <div className='ml-5 mt-6'>
-              <svg
-                className='bg-slate-800 text-slate-500 hover:cursor-pointer'
-                viewBox='0 0 24 24'
-                width='24'
-                height='24'
-              >
-                <path
-                  fill='currentColor'
-                  d='M1.101 21.757 23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z'
-                ></path>
-              </svg>
+              <button onClick={sendMessage}>
+                <svg
+                  className='bg-slate-800 text-slate-500 hover:cursor-pointer'
+                  viewBox='0 0 24 24'
+                  width='24'
+                  height='24'
+                >
+                  <path
+                    fill='currentColor'
+                    d='M1.101 21.757 23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z'
+                  ></path>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
