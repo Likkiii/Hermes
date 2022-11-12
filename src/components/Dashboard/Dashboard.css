@@ -44,3 +44,8 @@ ul li a {
 .items {
   font-family: 'DM Sans' !important;
 }
+
+.list1 {
+  list-style-type: none;
+  margin-left: 1.4rem;
+}

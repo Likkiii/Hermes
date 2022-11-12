@@ -4,6 +4,8 @@ import Groups from '../Groups/Groups';
 import Logout from '../../assets/logout.svg';
 import Message1 from '../Message/Message1';
 import Message2 from '../Message/Message2';
+import Text from '../Text/Text';
+import CryptoJS from 'crypto-js';
 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,18 +20,40 @@ const Dashboard = () => {
     email: '',
   });
   const [dropdownVisiblity, setDropdownVisibility] = useState('hidden');
+  const [secret, setSecret] = useState('');
+  const [group, setGroup] = useState('');
   const socket = React.useContext(SocketContext);
 
-  useEffect(() => {
-    socket.on('msg', (msg) => {
-      msg.self = false;
-      setMessages((messages) => [...messages, msg]);
-    });
+  const month = new Date().toLocaleString('default', {
+    month: 'long',
+  });
+  const date = `${new Date().getDate()} ${month} , ${new Date().getFullYear()}`;
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  const setupListeners = () => {
+    if (secret !== '') {
+      socket.on('msg', (msg) => {
+        msg.self = false;
+        const decryptedText = CryptoJS.AES.decrypt(
+          msg.message,
+          secret
+        ).toString(CryptoJS.enc.Utf8);
+        console.log('encrypted', msg.message);
+        console.log('secret', secret);
+        console.log('decryptedText', decryptedText);
+        msg.message = decryptedText;
+        setMessages((messages) => [...messages, msg]);
+      });
+
+      socket.on('status', (msg) => {
+        alert(msg);
+      });
+    }
+  };
+
+  useEffect(() => {
+    console.log('secret', secret);
+    setupListeners();
+  }, [secret]);
 
   const navigate = useNavigate();
 
@@ -42,13 +66,37 @@ const Dashboard = () => {
   };
 
   const joinGroup = () => {
-    const group = window.prompt('Enter the group code: ');
-    console.log(group);
+    const group = document.getElementById('group').value;
+    socket.emit('join', group);
+
+    const groupName = document.getElementById('groupName');
+    groupName.innerHTML = group;
+
+    const grpName = document.getElementById('grpName');
+    grpName.innerHTML = group;
+
+    const sec = document.getElementById('secret').value;
+    setSecret(sec);
+    setGroup(group);
+  };
+
+  const focusSecret = () => {
+    const secret = document.getElementById('secret');
+    secret.focus();
+  };
+
+  const focusGroup = () => {
+    const group = document.getElementById('group');
+    group.focus();
   };
 
   const sendMessage = () => {
     const message = document.getElementById('msg').value;
+    document.getElementById('msg').value = '';
     console.log(message);
+
+    const encryptedText = CryptoJS.AES.encrypt(message, secret).toString();
+    console.log('encryptedText', encryptedText);
 
     const time = new Date().toLocaleTimeString([], {
       timeStyle: 'short',
@@ -57,12 +105,13 @@ const Dashboard = () => {
     const name = user.username;
     const msg = {
       name,
-      message,
+      message: encryptedText,
       time,
       self: true,
     };
 
     socket.emit('msg', msg);
+    msg.message = message;
     setMessages([...messages, msg]);
   };
 
@@ -122,20 +171,24 @@ const Dashboard = () => {
           >
             <ul className='items flex flex-col lg:flex-row list-none lg:ml-auto mt-0.5'>
               <li className='nav-item'>
-                <div
-                  className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75 cursor-pointer'
-                  onClick={joinGroup}
-                >
-                  <span className='text-lg font-extrabold ml-2'>Join</span>
+                <div className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75 cursor-pointer'>
+                  <span
+                    onClick={focusSecret}
+                    className='text-lg font-extrabold ml-2'
+                  >
+                    Secret
+                  </span>
                 </div>
               </li>
               <li className='nav-item'>
-                <a
-                  className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75'
-                  href='#nil'
-                >
-                  <span className='text-lg font-extrabold ml-2'>Pin</span>
-                </a>
+                <div className='px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-slate-900 hover:opacity-75 cursor-pointer'>
+                  <span
+                    onClick={focusGroup}
+                    className='text-lg font-extrabold ml-2'
+                  >
+                    Join
+                  </span>
+                </div>
               </li>
               <li className='nav-item'>
                 <button
@@ -165,7 +218,14 @@ const Dashboard = () => {
                       {user.email}
                     </a>
                   </li>
-                  <li></li>
+                  <li>
+                    <a
+                      class='dropdown-item text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white focus:text-white focus:bg-gray-700'
+                      href='#nil'
+                    >
+                      {group}
+                    </a>
+                  </li>
                   <li>
                     <a
                       class='dropdown-item text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white focus:text-white focus:bg-gray-700'
@@ -190,16 +250,47 @@ const Dashboard = () => {
       </nav>
       <div className='flex flex-row'>
         <div className='sidebar bg-slate-900 w-1/5 max-h-screen'>
-          <input
-            type='text'
-            placeholder='Search for a group...'
-            className='bg-slate-700 text-white w-4/5 mt-2 ml-4 pl-3 py-1 rounded-lg mb-3'
-          />
           <div className='min-h-screen'>
             <div className='groups max-h-screen overflow-y-scroll'>
-              <Groups />
-              <Groups />
-              <Groups />
+              <ul className='list1'>
+                <li>
+                  <input
+                    id='group'
+                    type='text'
+                    placeholder='Enter group name..'
+                    className='bg-slate-700 text-white w-5/6 mt-2 pl-3 py-1 rounded-lg mb-3'
+                  />
+                </li>
+                <li>
+                  <input
+                    id='secret'
+                    type='password'
+                    placeholder='Enter secret..'
+                    className='bg-slate-700 text-white w-5/6 mt-2 pl-3 py-1 rounded-lg mb-3'
+                  />
+                </li>
+              </ul>
+              <button
+                onClick={joinGroup}
+                className='hover:bg-slate-600 bg-slate-700 text-white w-20 ml-6 mt-2 py-1 rounded-lg mb-3'
+              >
+                Submit
+              </button>
+              <li className='group w-full flex text-green-500 bg-slate-900 hover:bg-slate-800 justify-start pl-5 py-5 text-xl cursor-pointer '>
+                <div className='flex items-center'>
+                  <div className='block pr-2'>
+                    <img
+                      alt='avatar'
+                      src='https://images.unsplash.com/photo-1494548162494-384bba4ab999?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+                      className='rounded-full h-10 w-10'
+                    />
+                  </div>
+                  <p
+                    id='grpName'
+                    className='w-36 truncate text-left pl-2 pb-0.5'
+                  ></p>
+                </div>
+              </li>
             </div>
           </div>
         </div>
@@ -216,55 +307,8 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className='ml-4'>
-                  <p className='text-green-500 '>Group 1</p>
-                  <p className='text-green-500 text-xs mt-1'>
-                    {/* Thomas, Shreyas, Shravan, Additya */}
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex'>
-                <div>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    width='24'
-                    height='24'
-                  >
-                    <path
-                      fill='#263238'
-                      fill-opacity='.5'
-                      d='M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 3 9.7s3 6.7 6.7 6.7c1.6 0 3.2-.6 4.3-1.6l.3.3v.8l5.1 5.1 1.5-1.5-5-5.2zm-6.2 0c-2.6 0-4.6-2.1-4.6-4.6s2.1-4.6 4.6-4.6 4.6 2.1 4.6 4.6-2 4.6-4.6 4.6z'
-                    ></path>
-                  </svg>
-                </div>
-                <div className='ml-6'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    width='24'
-                    height='24'
-                  >
-                    <path
-                      fill='#263238'
-                      fill-opacity='.5'
-                      d='M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 0 0 3.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.959.958 2.423 1.053 3.263.215l5.511-5.512c.28-.28.267-.722.053-.936l-.244-.244c-.191-.191-.567-.349-.957.04l-5.506 5.506c-.18.18-.635.127-.976-.214-.098-.097-.576-.613-.213-.973l7.915-7.917c.818-.817 2.267-.699 3.23.262.5.501.802 1.1.849 1.685.051.573-.156 1.111-.589 1.543l-9.547 9.549a3.97 3.97 0 0 1-2.829 1.171 3.975 3.975 0 0 1-2.83-1.173 3.973 3.973 0 0 1-1.172-2.828c0-1.071.415-2.076 1.172-2.83l7.209-7.211c.157-.157.264-.579.028-.814L11.5 4.36a.572.572 0 0 0-.834.018l-7.205 7.207a5.577 5.577 0 0 0-1.645 3.971z'
-                    ></path>
-                  </svg>
-                </div>
-                <div className='ml-6'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    width='24'
-                    height='24'
-                  >
-                    <path
-                      fill='#263238'
-                      fill-opacity='.6'
-                      d='M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z'
-                    ></path>
-                  </svg>
+                  <p id='groupName' className='text-green-500 '></p>
+                  <p className='text-green-500 text-xs mt-1'></p>
                 </div>
               </div>
             </div>
@@ -273,9 +317,7 @@ const Dashboard = () => {
               <div className='py-2 px-3'>
                 <div className='flex justify-center mb-2'>
                   <div className='rounded bg-slate-700 py-2 px-4'>
-                    <p className='text-sm text-slate-400 uppercase'>
-                      October 3, 2022
-                    </p>
+                    <p className='text-sm text-slate-400 uppercase'>{date}</p>
                   </div>
                 </div>
                 <div className='flex justify-center mb-4'>

@@ -54,6 +54,7 @@ const Signup = () => {
         if ('error' in res.data) {
           console.log(res.data.error);
         } else {
+          alert('User successfully registered');
           navigate('/login');
         }
       })

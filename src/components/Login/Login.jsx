@@ -42,6 +42,8 @@ const Login = () => {
         if ('token' in res.data) {
           localStorage.setItem('token', res.data.token);
           navigate('/dashboard');
+        } else {
+          alert(res.data.error);
         }
       })
       .catch((err) => console.log(err));

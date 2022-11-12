@@ -1,7 +1,7 @@
 import React from 'react';
 import './Groups.css';
 
-const Groups = () => {
+const Groups = (prompt) => {
   return (
     <li className='group w-full flex text-green-500 bg-slate-900 hover:bg-slate-800 justify-start pl-5 py-5 text-xl cursor-pointer '>
       <div className='flex items-center'>
@@ -12,7 +12,9 @@ const Groups = () => {
             className='rounded-full h-10 w-10'
           />
         </div>
-        <p className='w-36 truncate text-left pl-2 pb-0.5'>Group1</p>
+        <p className='w-36 truncate text-left pl-2 pb-0.5'>
+          {prompt.groupName}
+        </p>
       </div>
     </li>
   );
